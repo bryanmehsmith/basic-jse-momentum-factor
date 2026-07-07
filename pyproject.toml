@@ -1,0 +1,28 @@
+[project]
+name = "momentum-factor"
+version = "0.1.0"
+description = "Basic Momentum Factor Backtesting Framework, to explain the momentum factor in finance."
+readme = "README.md"
+authors = [
+    { name = "Bryan Smith", email = "" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "matplotlib>=3.11.0",
+    "numpy>=2.5.1",
+    "pandas>=3.0.3",
+    "pyarrow>=24.0.0",
+    "yfinance>=1.5.1",
+]
+
+[project.scripts]
+momentum-factor = "momentum_factor:main"
+
+[build-system]
+requires = ["uv_build>=0.11.26,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
