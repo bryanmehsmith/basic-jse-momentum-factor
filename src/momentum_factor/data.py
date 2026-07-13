@@ -65,7 +65,9 @@ def get_prices(
     so a public demo degrades instead of crashing.
     """
     if not force_refresh and _is_cache_fresh(cache_path):
-        return pd.read_parquet(cache_path).loc[start:end]
+        cached = pd.read_parquet(cache_path)
+        if not cached.empty and cached.index.min() <= pd.Timestamp(start):
+            return cached.loc[start:end]
 
     try:
         prices = _download(tickers, start, end)
