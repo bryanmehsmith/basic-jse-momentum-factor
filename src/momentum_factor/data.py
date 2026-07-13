@@ -65,13 +65,13 @@ def get_prices(
     so a public demo degrades instead of crashing.
     """
     if not force_refresh and _is_cache_fresh(cache_path):
-        return pd.read_parquet(cache_path)
+        return pd.read_parquet(cache_path).loc[start:end]
 
     try:
         prices = _download(tickers, start, end)
     except Exception:
         if cache_path.exists():
-            return pd.read_parquet(cache_path)
+            return pd.read_parquet(cache_path).loc[start:end]
         if snapshot_path.exists():
             return _from_snapshot(tickers, start, end, snapshot_path)
         raise
