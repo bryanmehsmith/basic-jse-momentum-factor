@@ -39,7 +39,7 @@ with st.sidebar:
     )
     selected = st.multiselect("Universe", all_tickers, default=all_tickers)
     use_live = st.checkbox("Try live yfinance refresh (may be rate-limited)", value=False)
-    st.caption("Off by default — falls back to a bundled price snapshot if live data is unavailable.")
+    st.caption("Off by default, falls back to a bundled price snapshot if live data is unavailable.")
 
 if not selected:
     st.warning("Select at least one ticker in the sidebar.")
@@ -55,7 +55,7 @@ signal = momentum_signal(prices)
 returns = run_backtest(prices, signal, quantile=quantile)
 
 if returns.empty:
-    st.warning("No backtest periods for this selection — try a wider universe or earlier start date.")
+    st.warning("No backtest periods for this selection, try a wider universe or earlier start date.")
     st.stop()
 
 stats = summarize(returns)
@@ -74,5 +74,5 @@ st.pyplot(fig)
 
 st.caption(
     "Data: Yahoo Finance via yfinance, with a bundled fallback snapshot if live data "
-    "is unavailable. For research/education only — not investment advice."
+    "is unavailable. For research/education only, not investment advice."
 )
