@@ -22,15 +22,12 @@ universe = load_universe()
 all_tickers = universe["ticker"].tolist()
 
 st.title("JSE Momentum Factor Backtest")
-st.caption(
-    "Classic 12-1 month momentum: rank stocks by trailing 12-month return "
-    "(skipping the most recent month), hold the top quantile equal-weighted, "
-    "rebalance monthly."
-)
 
 with st.sidebar:
     st.header("Backtest settings")
     quantile = st.slider("Top quantile", min_value=0.05, max_value=0.6, value=0.2, step=0.05)
+    formation_months = st.slider("Formation window (months)", min_value=3, max_value=24, value=12, step=1)
+    skip_months = st.slider("Skip months", min_value=0, max_value=3, value=1, step=1)
     start_date = st.date_input(
         "Start date",
         value=date(2015, 1, 1),
@@ -40,6 +37,12 @@ with st.sidebar:
     selected = st.multiselect("Universe", all_tickers, default=all_tickers)
     use_live = st.checkbox("Try live yfinance refresh (may be rate-limited)", value=False)
     st.caption("Off by default, falls back to a bundled price snapshot if live data is unavailable.")
+
+st.caption(
+    f"Momentum factor: rank stocks by trailing {formation_months}-month return "
+    f"(skipping the most recent {skip_months} month{'s' if skip_months != 1 else ''}), "
+    "hold the top quantile equal-weighted, rebalance monthly."
+)
 
 if not selected:
     st.warning("Select at least one ticker in the sidebar.")
@@ -51,7 +54,7 @@ except Exception as exc:
     st.error(f"Could not load price data: {exc}")
     st.stop()
 
-signal = momentum_signal(prices)
+signal = momentum_signal(prices, formation_months=formation_months, skip_months=skip_months)
 returns = run_backtest(prices, signal, quantile=quantile)
 
 if returns.empty:
@@ -67,7 +70,10 @@ col3.metric("Max drawdown", f"{stats['max_drawdown']:.1%}")
 col4.metric("Cumulative return", f"{stats['cumulative_return']:.1%}")
 
 fig, ax = plt.subplots(figsize=(10, 5))
-(1 + returns).cumprod().plot(ax=ax, title=f"Cumulative growth (quantile={quantile})")
+(1 + returns).cumprod().plot(
+    ax=ax,
+    title=f"Cumulative growth (quantile={quantile}, formation={formation_months}m, skip={skip_months}m)",
+)
 ax.set_ylabel("Growth of 1")
 fig.tight_layout()
 st.pyplot(fig)

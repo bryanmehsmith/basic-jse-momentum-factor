@@ -9,6 +9,8 @@ from momentum_factor.signals import momentum_signal
 
 START_DATE = "2015-01-01"
 QUANTILES = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6]
+FORMATION_MONTHS = 12
+SKIP_MONTHS = 1
 SELECTION_METRIC = "sharpe_ratio"  # key into performance.summarize() used to pick the best quantile
 
 
@@ -17,10 +19,11 @@ def main() -> None:
     tickers = universe["ticker"].tolist()
 
     prices = get_prices(tickers, start=START_DATE)
-    signal = momentum_signal(prices)
+    signal = momentum_signal(prices, formation_months=FORMATION_MONTHS, skip_months=SKIP_MONTHS)
 
     print("Momentum factor backtest - JSE universe")
     print(f"Tickers: {', '.join(tickers)}")
+    print(f"Formation window: {FORMATION_MONTHS} months, skip: {SKIP_MONTHS} months")
     print(f"Sweeping quantiles: {QUANTILES}\n")
 
     results = []
