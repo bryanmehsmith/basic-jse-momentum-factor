@@ -23,6 +23,7 @@ def annualized_volatility(returns: pd.Series) -> float:
 
 
 def sharpe_ratio(returns: pd.Series, risk_free_rate: float = 0.0) -> float:
+    """Annualized Sharpe ratio. `risk_free_rate` is an annual rate, e.g. 0.04 for 4%."""
     excess = returns - risk_free_rate / PERIODS_PER_YEAR
     vol = excess.std()
     if vol == 0 or np.isnan(vol):
@@ -37,11 +38,11 @@ def max_drawdown(returns: pd.Series) -> float:
     return drawdown.min()
 
 
-def summarize(returns: pd.Series) -> dict:
+def summarize(returns: pd.Series, risk_free_rate: float = 0.0) -> dict:
     return {
         "cumulative_return": cumulative_return(returns),
         "annualized_return": annualized_return(returns),
         "annualized_volatility": annualized_volatility(returns),
-        "sharpe_ratio": sharpe_ratio(returns),
+        "sharpe_ratio": sharpe_ratio(returns, risk_free_rate=risk_free_rate),
         "max_drawdown": max_drawdown(returns),
     }

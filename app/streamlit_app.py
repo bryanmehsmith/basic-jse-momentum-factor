@@ -28,6 +28,14 @@ with st.sidebar:
     quantile = st.slider("Top quantile", min_value=0.05, max_value=0.6, value=0.2, step=0.05)
     formation_months = st.slider("Formation window (months)", min_value=3, max_value=24, value=12, step=1)
     skip_months = st.slider("Skip months", min_value=0, max_value=3, value=1, step=1)
+    risk_free_pct = st.number_input(
+        "Risk-free rate (% per year)",
+        min_value=0.0,
+        max_value=20.0,
+        value=4.0,
+        step=0.25,
+        help="Annual rate used as the Sharpe ratio benchmark, converted to monthly.",
+    )
     start_date = st.date_input(
         "Start date",
         value=date(2015, 1, 1),
@@ -61,10 +69,11 @@ if returns.empty:
     st.warning("No backtest periods for this selection, try a wider universe or earlier start date.")
     st.stop()
 
-stats = summarize(returns)
+risk_free_rate = risk_free_pct / 100
+stats = summarize(returns, risk_free_rate=risk_free_rate)
 
 col1, col2, col3, col4 = st.columns(4)
-col1.metric("Sharpe ratio", f"{stats['sharpe_ratio']:.2f}")
+col1.metric("Sharpe ratio", f"{stats['sharpe_ratio']:.2f}", help=f"Excess of a {risk_free_pct:.2f}% annual risk-free rate")
 col2.metric("Annualized return", f"{stats['annualized_return']:.1%}")
 col3.metric("Max drawdown", f"{stats['max_drawdown']:.1%}")
 col4.metric("Cumulative return", f"{stats['cumulative_return']:.1%}")
