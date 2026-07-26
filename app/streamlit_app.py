@@ -26,7 +26,12 @@ st.title("JSE Momentum Factor Backtest")
 with st.sidebar:
     # Root-relative, so it resolves to the demo-site landing page rather than
     # anywhere inside this app's /demos/momentum-factor base path.
-    st.markdown("[Back to all demos](/)")
+    #
+    # Written as HTML purely to force target="_self". Streamlit's markdown links
+    # and st.link_button both open a new tab, which leaves this demo's tab (and so
+    # its websocket, and so its process) alive behind the reader. Navigating in
+    # place lets the session close and the launcher reclaim the memory.
+    st.markdown('<a href="/" target="_self">Back to all demos</a>', unsafe_allow_html=True)
     st.header("Backtest settings")
     quantile = st.slider("Top quantile", min_value=0.05, max_value=0.6, value=0.2, step=0.05)
     formation_months = st.slider("Formation window (months)", min_value=3, max_value=24, value=12, step=1)
