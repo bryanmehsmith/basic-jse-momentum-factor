@@ -24,6 +24,9 @@ all_tickers = universe["ticker"].tolist()
 st.title("JSE Momentum Factor Backtest")
 
 with st.sidebar:
+    # Root-relative, so it resolves to the demo-site landing page rather than
+    # anywhere inside this app's /demos/momentum-factor base path.
+    st.markdown("[Back to all demos](/)")
     st.header("Backtest settings")
     quantile = st.slider("Top quantile", min_value=0.05, max_value=0.6, value=0.2, step=0.05)
     formation_months = st.slider("Formation window (months)", min_value=3, max_value=24, value=12, step=1)
