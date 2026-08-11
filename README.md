@@ -61,3 +61,7 @@ uv run pytest
 - `src/momentum_factor/performance.py` - return/risk metrics (Sharpe, drawdown, etc.)
 - `scripts/run_backtest.py` - CLI entrypoint wiring the pipeline together
 - `data/` - gitignored cache of downloaded price data
+
+## Scope
+
+Personal project using public data only; not affiliated with or representative of my employer.
