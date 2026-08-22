@@ -49,6 +49,31 @@ Run tests:
 uv run pytest
 ```
 
+The interactive version of this is a static JS frontend (`frontend/`), not a
+Streamlit app: it ports the signal/backtest/performance math from
+`src/momentum_factor/` directly into JS and runs client-side against a bundled
+monthly price snapshot. Open `frontend/index.html` through any static file
+server, e.g.:
+
+```bash
+cd frontend && python -m http.server
+```
+
+`app/api.py` is a small companion JSON API, used only by that frontend's "try
+live yfinance refresh" toggle:
+
+```bash
+uv run python app/api.py --port=8000
+# GET http://127.0.0.1:8000/prices?tickers=NPN.JO,MTN.JO&start=2015-01-01
+```
+
+Regenerate the bundled frontend snapshot after `refresh_snapshot.py` updates
+the parquet snapshot:
+
+```bash
+uv run scripts/export_snapshot_json.py
+```
+
 ## Universe
 
 `config/universe.csv` holds the JSE ticker universe (`ticker,name`), using yfinance's `.JO` suffix convention (e.g. `NPN.JO`). It currently contains a handful of large-cap placeholders; maintain this list by hand to expand or refine the universe.
@@ -60,6 +85,9 @@ uv run pytest
 - `src/momentum_factor/backtest.py` - quantile portfolio construction and vectorized backtest
 - `src/momentum_factor/performance.py` - return/risk metrics (Sharpe, drawdown, etc.)
 - `scripts/run_backtest.py` - CLI entrypoint wiring the pipeline together
+- `scripts/export_snapshot_json.py` - exports the bundled snapshot as monthly JSON for the frontend
+- `app/api.py` - tiny JSON API backing the frontend's live-refresh toggle, wraps `data.py`'s fallback chain
+- `frontend/` - the static JS demo: `signals.py`/`backtest.py`/`performance.py` ported to `frontend/js/modules/backtest.js`
 - `data/` - gitignored cache of downloaded price data
 
 ## Scope

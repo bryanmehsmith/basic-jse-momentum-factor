@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Momentum Factor / Bryan Smith</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="An interactive walk-through of the classic 12-1 momentum factor, backtested long-only on the JSE.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23fffdf9'/%3E%3Ctext x='50' y='66' font-family='Helvetica Neue,Arial,sans-serif' font-size='40' font-weight='700' fill='%237a4f22' text-anchor='middle'%3EBS%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-content">
+      <h1>JSE Momentum Factor</h1>
+      <a class="back-link" href="/" target="_self">&larr; Back to all demos</a>
+    </div>
+  </header>
+
+  <main>
+    <p class="intro">Momentum is the observation that stocks which have performed well over the trailing several months to a year tend to keep performing well over the following months, and stocks which have lagged tend to keep lagging. This walks through the classic "12-1" construction, why it's built the way it is, what turning it into a portfolio actually means, and lets you backtest it long-only on the JSE with your own settings. Look for <strong>Technical detail</strong> panels wherever you want the exact formulas.</p>
+
+    <div class="disclosure-controls">
+      <button type="button" class="expand-all">Expand all technical detail</button>
+      <button type="button" class="collapse-all">Collapse all</button>
+    </div>
+
+    <section class="module-section">
+      <h3>How momentum works</h3>
+      <p>Nobody fully agrees on why it works, and the standard explanations are behavioral rather than risk-based. Investors are slow to fully price in new information, an earnings surprise, a change in fundamentals, so the price keeps drifting toward fair value over months rather than adjusting all at once (<strong>underreaction</strong>). As a price move becomes visible, more investors pile in and reinforce the trend for a while (<strong>herding</strong>). And investors tend to sell winners quickly while holding onto losers far too long, which suppresses a stock's price reaction and lets an existing trend persist longer than it otherwise would (the <strong>disposition effect</strong>). These effects fade, and eventually reverse, over multi-year horizons, which is exactly why a momentum strategy defines a specific formation window rather than just "the stock has always gone up."</p>
+      <details class="tech">
+        <summary>Technical detail</summary>
+        <p>Momentum is one of the most persistent, widely documented anomalies in equity markets, first formalized by Jegadeesh &amp; Titman (1993) using US stocks, and since replicated across most markets and time periods, including the JSE. It sits awkwardly next to the efficient-markets view: the behavioral explanations above are the common account, but there's an ongoing academic argument over whether some of the premium instead compensates for a real, hard-to-diversify risk (crash risk, see the risks section below) rather than being pure mispricing. Both views agree on the empirical pattern; they disagree on why it should be expected to persist.</p>
+      </details>
+    </section>
+
+    <section class="module-section">
+      <h3>The "12-1" construction</h3>
+      <p>The classic momentum signal ranks stocks by their return over the trailing 12 months, but deliberately skips the most recent month. That's not an oversight: returns over the last month tend to <strong>reverse</strong> (a stock that jumped last month is somewhat more likely to give some of it back), which works against the momentum effect rather than for it. Skipping it keeps the ranking about the trend, not last month's noise.</p>
+      <details class="tech">
+        <summary>Technical detail</summary>
+        <p>For a formation window of <code>F</code> months and a skip of <code>S</code> months, the score at month <code>t</code> is <code>score(t) = P(t - S) / P(t - S - F) - 1</code>, i.e. the cumulative return from <code>t - S - F</code> to <code>t - S</code>. With the classic <code>S = 1, F = 12</code> ("12-1"), that's the return from 13 months ago to 1 month ago, not 12 months ago to today. The sliders below let you move both <code>F</code> and <code>S</code> independently.</p>
+      </details>
+    </section>
+
+    <section class="module-section">
+      <h3>Turning the signal into a portfolio</h3>
+      <p>Once every stock has a momentum score, the ranked list is split into buckets (quantiles). The textbook momentum strategy goes long the top bucket (past winners) and short the bottom bucket (past losers): a "long-short" or "winners-minus-losers" portfolio that's roughly market-neutral. Shorting individual JSE stocks isn't practical for most participants, so this demo instead runs a <strong>long-only top-quantile</strong> portfolio: equal-weight the top-ranked names, rebalance every month, hold until the next rebalance. That means it is <em>not</em> market-neutral: it carries the market's own ups and downs on top of whatever momentum itself contributes. It's also worth being honest that every monthly rebalance would incur real trading costs (spreads, commissions, market impact) that this backtest doesn't model, so the numbers below are a ceiling, not what an investor would actually keep.</p>
+      <details class="tech">
+        <summary>Technical detail</summary>
+        <p>At each rebalance date, holdings = the top <code>max(1, floor(n &times; quantile))</code> names by score, equal-weighted. The portfolio's return for that month is the mean of those names' next-month returns. This is a vectorized, unmodeled backtest: no transaction costs, no slippage, no bid/ask spread, no capacity constraints.</p>
+      </details>
+    </section>
+
+    <section class="module-section" id="widget">
+      <h3>Try it: run the backtest</h3>
+      <p class="module-lede">Settings below change the signal, the portfolio construction, and the sample; the chart and metrics recompute instantly since everything here runs in your browser.</p>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="quantile-slider">Top quantile: <span class="slider-output" id="quantile-output">20%</span></label>
+          <input type="range" id="quantile-slider" min="0.05" max="0.6" value="0.2" step="0.05">
+        </div>
+        <div class="field">
+          <label for="formation-slider">Formation window: <span class="slider-output" id="formation-output">12</span> months</label>
+          <input type="range" id="formation-slider" min="3" max="24" value="12" step="1">
+        </div>
+        <div class="field">
+          <label for="skip-slider">Skip: <span class="slider-output" id="skip-output">1</span> month(s)</label>
+          <input type="range" id="skip-slider" min="0" max="3" value="1" step="1">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="riskfree-slider">Risk-free rate: <span class="slider-output" id="riskfree-output">4.0%</span> per year</label>
+          <input type="range" id="riskfree-slider" min="0" max="20" value="4" step="0.25">
+        </div>
+        <div class="field">
+          <label for="start-slider">Start month: <span class="slider-output" id="start-output">Jan 2015</span></label>
+          <input type="range" id="start-slider" min="0" max="0" value="0" step="1">
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="universe-header">
+          <label>Universe</label>
+          <div class="universe-controls">
+            <button type="button" class="expand-all" id="universe-select-all">Select all</button>
+            <button type="button" class="collapse-all" id="universe-select-none">Select none</button>
+          </div>
+        </div>
+        <div class="universe-grid" id="universe-grid"></div>
+      </div>
+
+      <div class="toggle-row">
+        <label class="toggle-switch">
+          <input type="checkbox" id="live-refresh">
+          <span class="toggle-slider"></span>
+        </label>
+        <label for="live-refresh">Try live yfinance refresh (fetches fresh prices for the whole universe; may be rate-limited)</label>
+      </div>
+      <p class="live-status" id="live-status"></p>
+
+      <div class="callout callout-unsafe" id="empty-warning" style="display:none;">Not enough overlapping data for this selection. Widen the universe, move the start month earlier, or shorten the formation window.</div>
+
+      <div class="metric-row" id="metrics">
+        <div class="metric">
+          <span class="metric-value" id="metric-sharpe">-</span>
+          <span class="metric-label">Sharpe ratio</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value" id="metric-annualized">-</span>
+          <span class="metric-label">Annualized return</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value" id="metric-drawdown">-</span>
+          <span class="metric-label">Max drawdown</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value" id="metric-cumulative">-</span>
+          <span class="metric-label">Cumulative return</span>
+        </div>
+      </div>
+
+      <div class="chart-wrap" id="growth-chart"></div>
+
+      <details class="tech">
+        <summary>What these numbers mean</summary>
+        <p><code>Sharpe ratio</code>: mean monthly excess return over the risk-free rate, divided by its standard deviation, annualized by &times;&radic;12. Higher is more return per unit of risk taken.</p>
+        <p><code>Annualized return</code>: the constant yearly rate that would produce the same total growth over the sample.</p>
+        <p><code>Max drawdown</code>: the largest peak-to-trough decline in cumulative value over the sample; a rough sense of the worst it got.</p>
+        <p><code>Cumulative return</code>: total growth over the whole sample, un-annualized.</p>
+      </details>
+    </section>
+
+    <section class="module-section">
+      <h3>Risks to know going in</h3>
+      <div class="card-grid">
+        <div class="scenario-card">
+          <h4>Momentum crashes</h4>
+          <p>Momentum is prone to sharp, sudden reversals. In a market rebound after a crash, yesterday's beaten-down "losers" can rally hardest, hurting a long-winners position (and badly hurting the classic long-winners/short-losers version) right when it's least convenient.</p>
+        </div>
+        <div class="scenario-card">
+          <h4>A small, coarse universe</h4>
+          <p>The JSE has far fewer liquid large-caps than a market like the S&amp;P 500, so quantile buckets here are coarse and results are more sensitive to a handful of individual stocks than a backtest on a deeper universe would be.</p>
+        </div>
+        <div class="scenario-card">
+          <h4>Unmodeled costs</h4>
+          <p>Every monthly rebalance in real life means trading: spreads, commissions, market impact. None of that is in this backtest, so treat the numbers above as a ceiling on what a real implementation could achieve, not a forecast.</p>
+        </div>
+      </div>
+    </section>
+
+    <p class="disclaimer">Data: Yahoo Finance via yfinance, with a bundled monthly snapshot shown by default. The "live refresh" toggle above calls a small backend that re-downloads fresh prices; the momentum signal, portfolio backtest, and performance stats all run client-side in your browser either way. See the <a href="https://github.com/bryanmehsmith/basic-jse-momentum-factor" target="_blank" rel="noopener">Python backtester and tests</a> this is ported from. For research and education only, not investment advice.</p>
+  </main>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
