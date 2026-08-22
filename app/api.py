@@ -24,6 +24,7 @@ import pandas as pd
 from momentum_factor.data import get_prices
 
 DEFAULT_PORT = 8501
+MAX_TICKERS = 25
 
 
 def monthly_payload(tickers: list[str], start: str, force_refresh: bool) -> dict:
@@ -61,11 +62,15 @@ class Handler(BaseHTTPRequestHandler):
         if not tickers:
             self._json(400, {"error": "at least one ticker is required"})
             return
+        if len(tickers) > MAX_TICKERS:
+            self._json(400, {"error": f"too many tickers requested (max {MAX_TICKERS})"})
+            return
 
         try:
             self._json(200, monthly_payload(tickers, start, force_refresh))
         except Exception as exc:
-            self._json(502, {"error": f"{type(exc).__name__}: {exc}"})
+            print(f"{type(exc).__name__}: {exc}", file=sys.stderr)
+            self._json(502, {"error": "internal error"})
 
     def log_message(self, format: str, *args) -> None:
         pass

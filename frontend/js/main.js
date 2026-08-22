@@ -9,6 +9,13 @@ const API_PATH = "/demos/momentum-factor/api/prices";
 
 wireDisclosureControls(document.body);
 
+renderMathInElement(document.querySelector("main"), {
+  delimiters: [
+    { left: "\\[", right: "\\]", display: true },
+    { left: "\\(", right: "\\)", display: false },
+  ],
+});
+
 const quantileSlider = document.getElementById("quantile-slider");
 const quantileOutput = document.getElementById("quantile-output");
 const formationSlider = document.getElementById("formation-slider");

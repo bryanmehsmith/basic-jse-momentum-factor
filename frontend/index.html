@@ -7,6 +7,7 @@
 <meta name="description" content="An interactive walk-through of the classic 12-1 momentum factor, backtested long-only on the JSE.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23fffdf9'/%3E%3Ctext x='50' y='66' font-family='Helvetica Neue,Arial,sans-serif' font-size='40' font-weight='700' fill='%237a4f22' text-anchor='middle'%3EBS%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="vendor/katex/katex.min.css">
 </head>
 <body>
   <header class="header">
@@ -38,7 +39,7 @@
       <p>The classic momentum signal ranks stocks by their return over the trailing 12 months, but deliberately skips the most recent month. That's not an oversight: returns over the last month tend to <strong>reverse</strong> (a stock that jumped last month is somewhat more likely to give some of it back), which works against the momentum effect rather than for it. Skipping it keeps the ranking about the trend, not last month's noise.</p>
       <details class="tech">
         <summary>Technical detail</summary>
-        <p>For a formation window of <code>F</code> months and a skip of <code>S</code> months, the score at month <code>t</code> is <code>score(t) = P(t - S) / P(t - S - F) - 1</code>, i.e. the cumulative return from <code>t - S - F</code> to <code>t - S</code>. With the classic <code>S = 1, F = 12</code> ("12-1"), that's the return from 13 months ago to 1 month ago, not 12 months ago to today. The sliders below let you move both <code>F</code> and <code>S</code> independently.</p>
+        <p>For a formation window of <code>F</code> months and a skip of <code>S</code> months, the score at month <code>t</code> is \(\text{score}(t) = \dfrac{P(t-S)}{P(t-S-F)} - 1\), i.e. the cumulative return from <code>t - S - F</code> to <code>t - S</code>. With the classic <code>S = 1, F = 12</code> ("12-1"), that's the return from 13 months ago to 1 month ago, not 12 months ago to today. The sliders below let you move both <code>F</code> and <code>S</code> independently.</p>
       </details>
     </section>
 
@@ -47,7 +48,7 @@
       <p>Once every stock has a momentum score, the ranked list is split into buckets (quantiles). The textbook momentum strategy goes long the top bucket (past winners) and short the bottom bucket (past losers): a "long-short" or "winners-minus-losers" portfolio that's roughly market-neutral. Shorting individual JSE stocks isn't practical for most participants, so this demo instead runs a <strong>long-only top-quantile</strong> portfolio: equal-weight the top-ranked names, rebalance every month, hold until the next rebalance. That means it is <em>not</em> market-neutral: it carries the market's own ups and downs on top of whatever momentum itself contributes. It's also worth being honest that every monthly rebalance would incur real trading costs (spreads, commissions, market impact) that this backtest doesn't model, so the numbers below are a ceiling, not what an investor would actually keep.</p>
       <details class="tech">
         <summary>Technical detail</summary>
-        <p>At each rebalance date, holdings = the top <code>max(1, floor(n &times; quantile))</code> names by score, equal-weighted. The portfolio's return for that month is the mean of those names' next-month returns. This is a vectorized, unmodeled backtest: no transaction costs, no slippage, no bid/ask spread, no capacity constraints.</p>
+        <p>At each rebalance date, holdings = the top \(\max\!\big(1,\ \lfloor n \times \text{quantile} \rfloor\big)\) names by score, equal-weighted. The portfolio's return for that month is the mean of those names' next-month returns. This is a vectorized, unmodeled backtest: no transaction costs, no slippage, no bid/ask spread, no capacity constraints.</p>
       </details>
     </section>
 
@@ -126,7 +127,7 @@
 
       <details class="tech">
         <summary>What these numbers mean</summary>
-        <p><code>Sharpe ratio</code>: mean monthly excess return over the risk-free rate, divided by its standard deviation, annualized by &times;&radic;12. Higher is more return per unit of risk taken.</p>
+        <p><code>Sharpe ratio</code>: \(\text{Sharpe} = \dfrac{\overline{r - r_f}}{\sigma_{r - r_f}}\sqrt{12}\), the mean monthly excess return over the risk-free rate divided by its standard deviation, annualized. Higher is more return per unit of risk taken.</p>
         <p><code>Annualized return</code>: the constant yearly rate that would produce the same total growth over the sample.</p>
         <p><code>Max drawdown</code>: the largest peak-to-trough decline in cumulative value over the sample; a rough sense of the worst it got.</p>
         <p><code>Cumulative return</code>: total growth over the whole sample, un-annualized.</p>
@@ -154,6 +155,8 @@
     <p class="disclaimer">Data: Yahoo Finance via yfinance, with a bundled monthly snapshot shown by default. The "live refresh" toggle above calls a small backend that re-downloads fresh prices; the momentum signal, portfolio backtest, and performance stats all run client-side in your browser either way. See the <a href="https://github.com/bryanmehsmith/basic-jse-momentum-factor" target="_blank" rel="noopener">Python backtester and tests</a> this is ported from. For research and education only, not investment advice.</p>
   </main>
 
+  <script src="vendor/katex/katex.min.js"></script>
+  <script src="vendor/katex/contrib/auto-render.min.js"></script>
   <script type="module" src="js/main.js"></script>
 </body>
 </html>

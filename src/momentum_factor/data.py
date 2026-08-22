@@ -25,7 +25,7 @@ def _is_cache_fresh(path: Path) -> bool:
 
 
 def _download(tickers: list[str], start: str, end: str | None) -> pd.DataFrame:
-    raw = yf.download(tickers, start=start, end=end, auto_adjust=True, progress=False)
+    raw = yf.download(tickers, start=start, end=end, auto_adjust=True, progress=False, timeout=60)
     prices = raw["Close"] if isinstance(raw.columns, pd.MultiIndex) else raw[["Close"]]
     if isinstance(prices, pd.Series):
         prices = prices.to_frame(tickers[0])
